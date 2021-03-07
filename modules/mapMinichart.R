@@ -1,3 +1,4 @@
+
 data_map_EU_bar <- map_centroid_EU %>% 
   select(
     contains("-")) 

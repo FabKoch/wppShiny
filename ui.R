@@ -8,6 +8,5 @@
 #
 
 ui <- fluidPage(
-    histogramUI("hist1"),
     sliderPopYearUI("slide1")
 )
