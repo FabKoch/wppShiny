@@ -1,4 +1,4 @@
-sliderPopYearUI <- function(id) {
+mapMinichartUI <- function(id) {
   tagList(
     selectInput(NS(id,"integer"), 
                 "Jahre:",
@@ -19,4 +19,17 @@ sliderPopYearUI <- function(id) {
     )
   )
   
+}
+
+
+histogramServer <- function(id) {
+  moduleServer(id, function(input, output, session) {
+    data <- reactive(mtcars[[input$var]])
+    
+    output$mapMini <- renderLeaflet({
+      
+    })
+    
+
+  })
 }

@@ -8,5 +8,5 @@
 #
 
 ui <- fluidPage(
-    sliderPopYearUI("slide1")
+    mapMinichartUI("mapMini1")
 )
