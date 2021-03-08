@@ -10,7 +10,6 @@ library(tidyverse)
 
 
 
-source("./modules/counter.R")
 source("./modules/sliderYear.R")
 
 data("popF") # Daten weiblich
@@ -159,10 +158,6 @@ data_map_europe <- data_popFM_long %>%
   mutate(
     pop_total = sum(population)) %>% 
   ungroup() %>% 
-  filter(
-    age == "0-4"
-    | age == "30-34"
-    | age == "60-64") %>% 
   group_by(
     year,
     name,
@@ -170,11 +165,13 @@ data_map_europe <- data_popFM_long %>%
     age) %>% 
   mutate(age_perc = round(population/sum(pop_total)*100,1)) %>% 
   ungroup()
+
+
   
 map_polygon_EU <- sf::st_as_sf(data_map_europe %>%   
   left_join(data_EUmap) %>% 
   drop_na()) %>% 
-  sf::st_transform(., 4326) %>% filter(year == 2020)
+  sf::st_transform(., 4326) 
 
 map_centroid_EU <- data_map_europe %>% 
   select(
@@ -184,7 +181,9 @@ map_centroid_EU <- data_map_europe %>%
     names_from = age,
     values_from = age_perc) %>% 
   left_join(centroids) %>% 
-  drop_na() %>% filter(year == 2020)
+  drop_na() 
+
+
 
 
 

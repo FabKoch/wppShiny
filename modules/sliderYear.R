@@ -5,7 +5,7 @@ mapMinichartUI <- function(id) {
                 choices = wppYear,
                 selected = "2020"),
     
-    pickerInput(NS(id, "var"),
+    pickerInput(NS(id, "age"),
                 "Altersgruppen:",
                 choices = wppAge,
                 selected = c(
@@ -22,11 +22,38 @@ mapMinichartUI <- function(id) {
 }
 
 
-histogramServer <- function(id) {
+mapMinichartServer <- function(id) {
   moduleServer(id, function(input, output, session) {
-    data <- reactive(mtcars[[input$var]])
+    
+    data <- reactive(data_map_europe  %>% 
+                       filter(age == input$age) 
+                     )
+                     
+    polygon <- reactive(map_polygon_EU %>% 
+                          filter(year == input$year)
+                        )
+    
+    centroidData <- reactive(map_centroid_EU %>% 
+                           filter(year == input$year) %>% 
+                           select(
+                             contains("-")) 
+                         )
+    
+    centroids <- reactive(map_centroid_EU %>% 
+                               filter(year == input$year)
+                         ) 
+    
+    centroid <- centroids()
     
     output$mapMini <- renderLeaflet({
+      polygon() %>% 
+      addTiles(tilesURL) %>% 
+      addPolygons() %>% 
+      addMinicharts(
+        centroid$x, centroid$y,
+        chartdata = centroidData(),
+        colorPalette = d3.schemeCategory10,
+        width = 45, height = 45)
       
     })
     
