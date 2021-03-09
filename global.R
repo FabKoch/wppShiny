@@ -82,50 +82,51 @@ data_popFM_long <- data_popFM %>%
 
 # Pop Pyramid
 
-popPyData <- data_popFM_long %>% 
-  # filtert Kontinente und Länder Gruppen heraus
-  filter(!country_code >= 900) %>% 
-  group_by(
-    year,
-    name,
-    gender) %>% 
-  mutate(
-    percPop_country_gender = round(population/sum(population)*100,1)) %>% 
-  ungroup() %>% 
-  mutate(perc_MF = ifelse(gender == "F", percPop_country_gender*-1, percPop_country_gender)) %>% 
-  filter(
-    year == "2015"
-    & name == "Germany")
+# popPyData <- data_popFM_long %>% 
+#   # filtert Kontinente und Länder Gruppen heraus
+#   filter(!country_code >= 900) %>% 
+#   group_by(
+#     year,
+#     name,
+#     gender) %>% 
+#   mutate(
+#     percPop_country_gender = round(population/sum(population)*100,1)) %>% 
+#   ungroup() %>% 
+#   mutate(perc_MF = ifelse(gender == "F", percPop_country_gender*-1, percPop_country_gender)) %>% 
+#   filter(
+#     year == "2015"
+#     & name == "Germany")
 
 
 
 # Liniendiagramm ----
 
-data_popFM %>% 
-  filter(
-    name == "Germany"
-    | name == "France") %>% 
-  select(
-    name,
-    gender,
-    age,
-    contains("19"),
-    contains("20")) %>% 
-  pivot_longer(
-    cols = -c(age, gender, name),
-    values_to = "Anzahl",
-    names_to = "Jahr") %>% 
-  group_by(
-    name,
-    gender,
-    Jahr) %>% 
-  summarize(Anzahl = sum(Anzahl))
+# data_popFM %>% 
+#   filter(
+#     name == "Germany"
+#     | name == "France") %>% 
+#   select(
+#     name,
+#     gender,
+#     age,
+#     contains("19"),
+#     contains("20")) %>% 
+#   pivot_longer(
+#     cols = -c(age, gender, name),
+#     values_to = "Anzahl",
+#     names_to = "Jahr") %>% 
+#   group_by(
+#     name,
+#     gender,
+#     Jahr) %>% 
+#   summarize(Anzahl = sum(Anzahl))
 
 # Map ----
-centroids <- rworldmap::getMap(resolution="low") %>% 
-  rgeos::gCentroid(byid=TRUE) %>% 
-  as.data.frame() %>% 
-  tibble::rownames_to_column("name")
+centroidWorlmap <- rworldmap::getMap(resolution="low")
+
+centroids <- cbind.data.frame(data.frame(rgeos::gCentroid(centroidWorlmap,byid=TRUE), id = centroidWorlmap@data$ISO_N3)) %>% 
+  tibble::rownames_to_column("name") %>% 
+  mutate(id = stringr::str_pad(id, 3, pad = "0"))
 
 
 tilesURL <- "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
@@ -170,6 +171,11 @@ data_map_europe <- data_popFM_long %>%
   
 map_polygon_EU <- sf::st_as_sf(data_map_europe %>%   
   left_join(data_EUmap) %>% 
+  select(
+    -age,
+    -age_perc,
+    -population) %>% 
+  distinct() %>% 
   drop_na()) %>% 
   sf::st_transform(., 4326) 
 
@@ -180,11 +186,8 @@ map_centroid_EU <- data_map_europe %>%
   pivot_wider(
     names_from = age,
     values_from = age_perc) %>% 
-  left_join(centroids) %>% 
+  left_join(centroids, by = c("country_code" = "id")) %>% 
   drop_na() 
-
-
-
 
 
 

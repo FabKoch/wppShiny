@@ -8,6 +8,5 @@
 #
 
 server <- function(input, output, session) {
-      
   mapMinichartServer("mapMini1")
 }
