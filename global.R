@@ -10,7 +10,7 @@ library(tidyverse)
 
 
 
-source("./modules/sliderYear.R")
+source("./modules/leafMini.R")
 
 data("popF") # Daten weiblich
 data("popM") # Daten männlich
@@ -44,7 +44,7 @@ data_popFM <- popM %>%
 
 
 
-# im long format
+# im long format ----
 data_popFM_long <- data_popFM %>% 
   pivot_longer(
     # es werden die Spalten ent-pivotiert, die 4 Zahlen beinhalten (also bspw. 1950, 2015), also die yeares Spalten 
@@ -80,51 +80,60 @@ data_popFM_long <- data_popFM %>%
         "100+")))
 
 
-# Pop Pyramid
+# Pop Pyramid ----
 
-# popPyData <- data_popFM_long %>% 
-#   # filtert Kontinente und Länder Gruppen heraus
-#   filter(!country_code >= 900) %>% 
-#   group_by(
-#     year,
-#     name,
-#     gender) %>% 
-#   mutate(
-#     percPop_country_gender = round(population/sum(population)*100,1)) %>% 
-#   ungroup() %>% 
-#   mutate(perc_MF = ifelse(gender == "F", percPop_country_gender*-1, percPop_country_gender)) %>% 
-#   filter(
-#     year == "2015"
-#     & name == "Germany")
+popPyData <- data_popFM_long %>%
+  # filtert Kontinente und Länder Gruppen heraus
+  filter(!country_code >= 900) %>%
+  group_by(
+    year,
+    name,
+    gender) %>%
+  mutate(
+    percPop_country_gender = round(population/sum(population)*100,1)) %>%
+  ungroup() %>%
+  mutate(perc_MF = ifelse(gender == "F", percPop_country_gender*-1, percPop_country_gender)) %>%
+  filter(
+    year == "2015"
+    & name == "Germany")
 
 
 
 # Liniendiagramm ----
 
-# data_popFM %>% 
-#   filter(
-#     name == "Germany"
-#     | name == "France") %>% 
-#   select(
-#     name,
-#     gender,
-#     age,
-#     contains("19"),
-#     contains("20")) %>% 
-#   pivot_longer(
-#     cols = -c(age, gender, name),
-#     values_to = "Anzahl",
-#     names_to = "Jahr") %>% 
-#   group_by(
-#     name,
-#     gender,
-#     Jahr) %>% 
-#   summarize(Anzahl = sum(Anzahl))
+data_popFM %>%
+  filter(
+    name == "Germany"
+    | name == "France") %>%
+  select(
+    name,
+    gender,
+    age,
+    contains("19"),
+    contains("20")) %>%
+  pivot_longer(
+    cols = -c(age, gender, name),
+    values_to = "Anzahl",
+    names_to = "Jahr") %>%
+  group_by(
+    name,
+    gender,
+    Jahr) %>%
+  summarize(Anzahl = sum(Anzahl))
+
 
 # Map ----
+
+
+
 centroidWorlmap <- rworldmap::getMap(resolution="low")
 
-centroids <- cbind.data.frame(data.frame(rgeos::gCentroid(centroidWorlmap,byid=TRUE), id = centroidWorlmap@data$ISO_N3)) %>% 
+centroids <- cbind.data.frame(
+  data.frame(
+    rgeos::gCentroid(
+      centroidWorlmap,
+      byid=TRUE), 
+    id = centroidWorlmap@data$ISO_N3)) %>% 
   tibble::rownames_to_column("name") %>% 
   mutate(id = stringr::str_pad(id, 3, pad = "0"))
 
@@ -177,6 +186,7 @@ map_polygon_EU <- sf::st_as_sf(data_map_europe %>%
     -population) %>% 
   distinct() %>% 
   drop_na()) %>% 
+  mutate(pop_total = round(pop_total/1000000,1)) %>% 
   sf::st_transform(., 4326) 
 
 map_centroid_EU <- data_map_europe %>% 
