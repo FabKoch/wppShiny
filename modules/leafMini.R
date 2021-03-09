@@ -18,7 +18,7 @@ mapMinichartUI <- function(id) {
                                `deselect-all-text` = "Keine",
                                `select-all-text` = "Alle"),
                 pickerOptions(
-                  maxOptions = 3,
+                  maxOptions = 4,
                   maxOptionsText = "Maximum erreicht"
                 )
     ),
@@ -54,14 +54,15 @@ mapMinichartServer <- function(id) {
                         inputId = ns("age"),
                         choices = wppAge)
       
+      # TODO add fill based on HWB/mio
       # https://rstudio.github.io/leaflet/choropleths.html
       # bindata <- polygon()
       # 
       # bins <- cartography::getBreaks(
       #   bindata$pop_total,
-      #   method = "equal") 
+      #   method = "equal")
       # 
-      # pal <- colorBin("YlOrRd", domain = bindata$pop_total, bins = bins) 
+      # pal <- colorBin("YlOrRd", domain = bindata$pop_total, bins = bins)
 
       
       # Map
