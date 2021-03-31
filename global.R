@@ -23,7 +23,8 @@ data("UNlocations") # Schlüsselliste
 # Populationdata Male/Female
 
 # gemergte Daten für männlich und weiblich, dazu join von Kontinenten und Gruppierungen nach UN Definition
-popFemale <- popF %>% mutate(gender = "F")
+popFemale <- popF %>% 
+  mutate(gender = "F")
 
 
 data_popFM <- popM %>% 
@@ -82,52 +83,53 @@ data_popFM_long <- data_popFM %>%
 
 # Pop Pyramid ----
 
-popPyData <- data_popFM_long %>%
-  # filtert Kontinente und Länder Gruppen heraus
-  filter(!country_code >= 900) %>%
-  group_by(
-    year,
-    name,
-    gender) %>%
-  mutate(
-    percPop_country_gender = round(population/sum(population)*100,1)) %>%
-  ungroup() %>%
-  mutate(perc_MF = ifelse(gender == "F", percPop_country_gender*-1, percPop_country_gender)) %>%
-  filter(
-    year == "2015"
-    & name == "Germany")
+# TODO
+# popPyData <- data_popFM_long %>%
+#   # filtert Kontinente und Länder Gruppen heraus
+#   filter(!country_code >= 900) %>%
+#   group_by(
+#     year,
+#     name,
+#     gender) %>%
+#   mutate(
+#     percPop_country_gender = round(population/sum(population)*100,1)) %>%
+#   ungroup() %>%
+#   mutate(perc_MF = ifelse(gender == "F", percPop_country_gender*-1, percPop_country_gender)) %>%
+#   filter(
+#     year == "2015"
+#     & name == "Germany")
 
 
 
 # Liniendiagramm ----
-
-data_popFM %>%
-  filter(
-    name == "Germany"
-    | name == "France") %>%
-  select(
-    name,
-    gender,
-    age,
-    contains("19"),
-    contains("20")) %>%
-  pivot_longer(
-    cols = -c(age, gender, name),
-    values_to = "Anzahl",
-    names_to = "Jahr") %>%
-  group_by(
-    name,
-    gender,
-    Jahr) %>%
-  summarize(Anzahl = sum(Anzahl))
+# TODO
+# data_popFM %>%
+#   filter(
+#     name == "Germany"
+#     | name == "France") %>%
+#   select(
+#     name,
+#     gender,
+#     age,
+#     contains("19"),
+#     contains("20")) %>%
+#   pivot_longer(
+#     cols = -c(age, gender, name),
+#     values_to = "Anzahl",
+#     names_to = "Jahr") %>%
+#   group_by(
+#     name,
+#     gender,
+#     Jahr) %>%
+#   summarize(Anzahl = sum(Anzahl))
 
 
 # Map ----
 
-
-
+# Centroids
 centroidWorlmap <- rworldmap::getMap(resolution="low")
 
+# extract x/y
 centroids <- cbind.data.frame(
   data.frame(
     rgeos::gCentroid(
@@ -137,15 +139,17 @@ centroids <- cbind.data.frame(
   tibble::rownames_to_column("name") %>% 
   mutate(id = stringr::str_pad(id, 3, pad = "0"))
 
-
+# polygon tiles
 tilesURL <- "http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
 
+# country geometry
 data_EUmap <- st_as_sf(rnaturalearth::countries110) %>%  
   select(
     country_code = iso_n3,
     geometry) %>% 
   drop_na()
 
+# calc data
 data_map_europe <- data_popFM_long %>% 
   filter(area_name == "Europe") %>% 
   select(
@@ -177,7 +181,7 @@ data_map_europe <- data_popFM_long %>%
   ungroup()
 
 
-  
+# merge geometry data  
 map_polygon_EU <- sf::st_as_sf(data_map_europe %>%   
   left_join(data_EUmap) %>% 
   select(
@@ -189,6 +193,7 @@ map_polygon_EU <- sf::st_as_sf(data_map_europe %>%
   mutate(pop_total = round(pop_total/1000000,1)) %>% 
   sf::st_transform(., 4326) 
 
+# centroid data
 map_centroid_EU <- data_map_europe %>% 
   select(
     -population,
@@ -202,6 +207,7 @@ map_centroid_EU <- data_map_europe %>%
 
 
 # input data ----
+# filter columns
 wppYear <- popM %>% 
   select(-c("country_code", "name", "age")) %>% 
   colnames()

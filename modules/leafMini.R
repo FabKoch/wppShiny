@@ -54,6 +54,7 @@ mapMinichartServer <- function(id) {
                         inputId = ns("age"),
                         choices = wppAge)
       
+      
       # TODO add fill based on HWB/mio
       # https://rstudio.github.io/leaflet/choropleths.html
       # bindata <- polygon()
@@ -67,7 +68,12 @@ mapMinichartServer <- function(id) {
       
       # Map
       leaflet(polygon()) %>% 
-      addTiles(tilesURL) %>% 
+      addTiles(
+        tilesURL) %>% 
+      setView(
+        10.385777,
+        51.1069790,	
+        zoom = 5) %>% 
       addPolygons(
         fillColor = "gray",
         weight = 2,
